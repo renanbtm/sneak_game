@@ -132,10 +132,12 @@ class Snake:
 
     def colision(self, head):
         if head in self.body[1:]:
+            pygame.display.set_caption("Snake - Last score: {}".format(snake.score))
             saveBest(snake.best)
             return True
         if edges:
             if head[0] > 490 or head[0] < 0 or head[1] > 490 or head[1] < 0:
+                pygame.display.set_caption("Snake - Last score: {}".format(snake.score))
                 saveBest(snake.best)
                 return True
 
