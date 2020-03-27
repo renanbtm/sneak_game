@@ -157,8 +157,7 @@ class Fruit:
         conflict = True
         while conflict:
             position = (random.randint(1, 49) * 10, random.randint(1, 49) * 10)
-            if position in snake.body:
-            else:
+            if position not in snake.body:
                 conflict = False
         return position
 
