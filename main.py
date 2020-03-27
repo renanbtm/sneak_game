@@ -154,11 +154,13 @@ class Fruit:
 
     @staticmethod
     def spawn(snake):
-        position = (random.randint(1, 49) * 10, random.randint(1, 49) * 10)
-        if position in snake.body:
-            Fruit.spawn(snake)
-        else:
-            return position
+        conflict = True
+        while conflict:
+            position = (random.randint(1, 49) * 10, random.randint(1, 49) * 10)
+            if position in snake.body:
+            else:
+                conflict = False
+        return position
 
 if __name__ == '__main__':
 
