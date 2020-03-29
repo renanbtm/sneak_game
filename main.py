@@ -163,6 +163,13 @@ class Fruit:
                 conflict = False
         return position
 
+def restart(screen, fruit, snake, hud):
+    screen.fill((0, 0, 0))
+    fruit.blit(screen)
+    snake.blit(screen)
+    hud.blit(screen, snake.score, snake.best)
+    pygame.display.update()
+
 if __name__ == '__main__':
 
     screen = pygame.display.set_mode((500, 600))  # game 500x500px, HUD 500x100px
@@ -175,8 +182,9 @@ if __name__ == '__main__':
     snake = Snake(best)
     fruit = Fruit(snake)
     hud = HUD()
-    paused = False
+    paused = True
     edges = False
+    restart(screen, fruit, snake, hud)
 
     while True:
         clock.tick(18)
@@ -211,6 +219,8 @@ if __name__ == '__main__':
             if snake.colision(snake.body[0]):
                 best = loadBest()
                 snake = Snake(best)
+                paused = True
+                restart(screen, fruit, snake, hud)
             snake.move()
         hud.blit(screen, snake.score, snake.best)
         pygame.display.update()
