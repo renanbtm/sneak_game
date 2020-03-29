@@ -4,14 +4,21 @@ import pickle
 
 pygame.init()
 
+edges = False
+
+
 def loadBest():
+    best_score = BestScore()
     try:
         file_name = "bestScore.db"
         with open(file_name, "rb") as file:
             best_score = pickle.load(file)
             return best_score
-    except:
-        return 0
+    except Exception as e:
+         print(e)
+    finally:
+        return best_score
+
 
 def saveBest(best):
     try:
@@ -20,6 +27,14 @@ def saveBest(best):
             pickle.dump(best, file)
     except Exception as e:
         print("Save failed")
+
+
+class BestScore:
+
+    def __init__(self):
+        self.best_edges_off = 0
+        self.best_edges_on = 0
+
 
 class HUD:
     color = (255, 255, 0)
@@ -31,7 +46,7 @@ class HUD:
 
         self.position = (0, 500)
 
-    def blit(self, screen, score, best):
+    def blit(self, screen, score, best: BestScore):
         black = (0, 0, 0)
         screen.blit(self.texture, self.position)
         small_font = pygame.font.Font("freesansbold.ttf", 14)
@@ -64,12 +79,13 @@ class HUD:
             edge_on_off = small_font.render(" OFF ", True, black, (255, 0, 0))
         screen.blit(edge_on_off, (370, 530))
 
+
 class Snake:
     color = (255, 255, 255)
     size = (10, 10)
     velocity = 10
 
-    def __init__(self, best):
+    def __init__(self, best: BestScore):
         self.texture = pygame.Surface(self.size)
         self.texture.fill(self.color)
 
@@ -77,7 +93,10 @@ class Snake:
         self.direction = "r"
 
         self.score = 0
-        self.best = best
+        if edges:
+            self.best = best.best_edges_on
+        else:
+            self.best = best.best_edges_off
 
     def blit(self, screen):
         for position in self.body:
@@ -133,13 +152,12 @@ class Snake:
     def colision(self, head):
         if head in self.body[1:]:
             pygame.display.set_caption("Snake - Last score: {}".format(snake.score))
-            saveBest(snake.best)
             return True
         if edges:
             if head[0] > 490 or head[0] < 0 or head[1] > 490 or head[1] < 0:
                 pygame.display.set_caption("Snake - Last score: {}".format(snake.score))
-                saveBest(snake.best)
                 return True
+
 
 class Fruit:
     color = (240, 0, 0)
@@ -163,12 +181,14 @@ class Fruit:
                 conflict = False
         return position
 
+
 def restart(screen, fruit, snake, hud):
     screen.fill((0, 0, 0))
     fruit.blit(screen)
     snake.blit(screen)
     hud.blit(screen, snake.score, snake.best)
     pygame.display.update()
+
 
 if __name__ == '__main__':
 
@@ -183,7 +203,6 @@ if __name__ == '__main__':
     fruit = Fruit(snake)
     hud = HUD()
     paused = True
-    edges = False
     restart(screen, fruit, snake, hud)
 
     while True:
@@ -209,6 +228,10 @@ if __name__ == '__main__':
                 elif event.key == pygame.K_e:
                     if snake.score == 0:
                         edges = not edges
+                        if edges:
+                            snake.best = best.best_edges_on
+                        else:
+                            snake.best = best.best_edges_off
 
         if not paused:
             screen.fill((0, 0, 0))
@@ -217,6 +240,13 @@ if __name__ == '__main__':
             if snake.eat():
                 fruit = Fruit(snake)
             if snake.colision(snake.body[0]):
+                if edges:
+                    if snake.score > best.best_edges_on:
+                        best.best_edges_on = snake.score
+                else:
+                    if snake.score > best.best_edges_off:
+                        best.best_edges_off = snake.score
+                saveBest(best)
                 best = loadBest()
                 snake = Snake(best)
                 paused = True
